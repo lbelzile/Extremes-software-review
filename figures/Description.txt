@@ -1,0 +1,7 @@
+The scripts in this directory generate the two figures found in the manuscript.
+
+* Figure 1 is a two-panel plot with the profile log-likelihood of the reparametrized generalized Pareto (left) and the likelihood surface of the inhomogeneous Poisson process when we fix the scale parameter to a fixed value (right)
+* Figure 2 uses results from a simulation study with seed 123 where we generate data from a Gamma distribution with shape 3 and scale 2 for samples of size 200, 300, ..., 900, 1000, 2000, ..., 9000 while thresholding the data at the true 95% of the gamma distribution. The results are based on generalized Pareto parameter estimates obtained based on 1000 simulated datasets. The plot shows the sampling distribution of the shape as well as the gradient for the simulations that did not return a boundary case.
+
+The function "utility-fun.R" can be found in the folder for the vignette 
+

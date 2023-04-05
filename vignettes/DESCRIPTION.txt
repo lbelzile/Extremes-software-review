@@ -1,0 +1,20 @@
+The vignettes are constructed using the following files 
+
+* 01_univariate_extremes.qmd
+* 02_bayesian_extremes.qmd
+
+The Quarto files (*.qmd) contain the text and the code used to generate the html and PDF of the vignettes
+The R code in the Quarto files has been extracted using 'knitr::purl()'
+
+Other scripts called in 
+* 01_univariate_extremes.qmd
+include 
+a) Distribution and density functions from file "check_density_CDF.R", which generates .RData and .csv output in a dedicated folder
+b) Model fit run from files "check_gev_fit.R" and "check_gpd_fit.R"
+These use internally the functions "utility-fun.R" and "utility-fun-maxblock.R"
+
+* 02_bayesian_extremes
+
+The vignette compiles Stan programs, which are defined in files "gev.stan" and "gpd.stan"
+
+The files "gev_pkg_list.csv" and "gpd_pkg_list.csv" list functions, version numbers and arguments of the implementations of the generalized extreme value and generalized Pareto distributions.
