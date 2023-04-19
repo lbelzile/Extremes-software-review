@@ -1,4 +1,7 @@
-setwd(here::here())
+if (!"this.path" %in% installed.packages()[, "Package"]){
+  install.packages("this.path")
+}
+setwd(this.path::here())
 source("utility-fun.R")
 if (!dir.exists("outputs")) {
   dir.create("outputs")
@@ -301,6 +304,9 @@ if (any(!gpdpkglist[, "package"] %in% installed.packages()[, "Package"]))
   pkg2install <-
     gpdpkglist[!gpdpkglist[, "package"] %in% installed.packages()[, "Package"] , "package"]
   cat(pkg2install, "\n")
+  for(pkg in pkg2install){
+    install.packages(pkg2install)
+  }
   stop("missing packages")
 }
 
@@ -317,14 +323,14 @@ n2 <- c(20L, 50L, 100L, 1000L)
 fname <- "GPD-fit"
 
 ## ---- GPD fit heavy tail -------------------------------------------
-set.seed(123)
+
 nrep <- 1000
 
 
 cat("\n******************************\n")
 cat("***\t\t GPD fit 1 check\t\t***\n")
 
-
+set.seed(202304)
 time.pos <- system.time(
   res_pos <-
     check_gpd_varyingsize(
@@ -355,7 +361,7 @@ print(time.pos)
 ## ---- GPD fit light tail -------------------------------------------
 cat("\n******************************\n")
 cat("***\t\t GPD fit 2 check\t\t***\n")
-set.seed(123)
+set.seed(202304)
 # qu <- qgamma(p = 0.95, shape = 3, scale = 2)
 time.exp <- system.time(
   res_exp <- check_gpd_varyingsize(
@@ -378,7 +384,7 @@ save(res_exp, file = paste0("outputs/", format(Sys.time(), "%Y_%m_%d_"), fname, 
 
 cat("\n******************************\n")
 cat("***\t\t GPD fit 3 check\t\t***\n")
-
+set.seed(202304)
 time.neg <- system.time(
   res_neg <- check_gpd_varyingsize(
     n = n2,

@@ -1,7 +1,10 @@
 ---
 title: "Likelihood inference for univariate extremes"
-format: html
-author: "Christophe Dutang, Leo Belzile"
+format: 
+  pdf:
+    keep-tex: true
+  html:
+    toc: true  
 ---
 
 ```{r}
@@ -10,6 +13,10 @@ author: "Christophe Dutang, Leo Belzile"
 #| eval: true
 library(ggplot2)
 library(patchwork)
+if (!"this.path" %in% installed.packages()[, "Package"]){
+  install.packages("this.path")
+}
+setwd(this.path::here())
 ```
 
 ## Density and distribution function checks
@@ -20,36 +27,43 @@ The generalized Pareto distribution has lower bound at the location parameter $u
 
 ```{r}
 #| label: tbl-gp1
-#| tbl-cap: "Evaluation of density and distribution function for the generalized Pareto model."
+#| tbl-cap: "Evaluation of  generalized Pareto model density and distribution functions."
 #| eval: true
 #| echo: false
 #| message: false
 #| warning: false
 #| cache: true
-setwd(here::here())
 options(knitr.kable.NA = '')
-gpd_csv <- "outputs/2022_03_01_gpdpkglist-final.csv"
-gpd_checks <- read.csv(file = gpd_csv)
+gpd_csv <- tail(list.files(path = "outputs/", 
+           pattern = ".{10}_gpdpkglist-final",
+           full.names = TRUE), 1)
+if(length(gpd_csv) > 0){
+  gpd_checks <- read.csv(file = gpd_csv)
+} else{
+  stop("csv file not found")
+}
 gpd_checks |> 
-  dplyrfilter(!is.na(fun)) |>
-  dplyrselect(package,
+  dplyr::filter(!is.na(fun)) |>
+  dplyr::select(package,
                   location,
                   density.comment, 
                   distribution.comment) |>
-  dplyrmutate(location = ifelse(is.na(location),
+  dplyr::mutate(location = ifelse(is.na(location),
                                     "no",
                                     "yes")) |>
-   dplyr::arrange("package") |>
+  dplyr::arrange(tolower(package)) |>
   knitr::kable(col.names = c("package",
                                   "location",
                                   "density",
                                   "distribution function"),
-                    row.names = FALSE)
+               row.names = FALSE,
+               booktabs = TRUE) |>
+  kableExtra::kable_styling()
 ```
 
 ```{r}
 #| label: tbl-gev1
-#| tbl-cap: "Evaluation of density and distribution function for the generalized extreme value distribuion."
+#| tbl-cap: "Evaluation of  generalized extreme value density and distribution functions."
 #| eval: true
 #| echo: false
 #| message: false
@@ -58,18 +72,21 @@ gpd_checks |>
 #| error: false
 
 options(knitr.kable.NA = '')
-gev_csv <- "outputs/2022_03_01_gevpkglist-final.csv"
+gev_csv <- tail(list.files(path = "outputs/", 
+           pattern = ".{10}_gevpkglist-final.csv", full.names = TRUE), 1)
 gev_checks <- read.csv(file = gev_csv)
 gev_checks |> 
-  dplyrfilter(!is.na(fun)) |>
-  dplyrselect(package,
+  dplyr::filter(!is.na(fun)) |>
+  dplyr::select(package,
                   density.comment, 
                   distribution.comment) |>
-   dplyr::arrange("package") |>
+   dplyr::arrange(tolower(package)) |>
   knitr::kable(col.names = c("package",
                              "density",
                              "distribution function"),
-                    row.names = FALSE)
+               row.names = FALSE,
+               booktabs = TRUE) |>
+  kableExtra::kable_styling()
 ```
 
 Certain packages, listed in @tbl-gp1 and @tbl-gev1, have incorrect implementations of density and distribution functions.
@@ -77,7 +94,7 @@ Certain packages, listed in @tbl-gp1 and @tbl-gev1, have incorrect implementatio
 
 ## Optimization routines
 
-We also compared the maximum likelihood estimates returned by default estimation procedures for different packages for simulated data, checking that the value returned is a global optimum and the gradient is approximately zero whenever $\widehat{\xi} > -1$. 
+We compared the maximum likelihood estimates returned by default estimation procedures for different packages for simulated data, checking that the value returned is a global optimum and the gradient is approximately zero whenever $\widehat{\xi} > -1$. For the generalized extreme value distribution, both `POT` and `evd` return sampling distributions that are underdispersed relative to other implementations, while `ercv` and `extRemes` both have a large number of runs that return exactly zero for the shape parameter.
 
 
 ### Generalized Pareto distribution
@@ -85,7 +102,7 @@ We also compared the maximum likelihood estimates returned by default estimation
 For threshold exceedances, we simulated 
 <!-- $n=200, \ldots, 900$ observations and set the threshold to the theoretical quantile of the distribution. We focus in the report on $n=400$, which leads to an average of 20 exceedances. 
 -->
-50 exceedances from a generalized Pareto distribution $\mathsf{GP}(\sigma=1000, \xi=-0.5)$ and from an exponential distribution with $\sigma=1000$. The large scale value is intended to check the robustness of gradient-based algorithms; from an optimization perspective, it is wise to ensure that the gradient of each component, scale and shape, is not too far apart in magnitude. The data could easily be scaled prior to the optimization in case this is problematic.
+50 exceedances from a generalized Pareto distribution $\mathsf{GP}(\sigma=1000, \xi=-0.5)$ and from an exponential distribution with $\sigma=1000$. The large scale value is intended to check the robustness of gradient-based algorithms; from an optimization perspective, it is wise to ensure that the gradient of each component, scale and shape, are not magnitude apart. The data can easily be scaled prior to the optimization in case this is problematic.
 
 
 ```{r}
@@ -95,10 +112,11 @@ For threshold exceedances, we simulated
 #| eval: true
 #| message: false
 #| warning: false
-# library(dplyr, warn.conflicts = FALSE)
+# library(dplyr::, warn.conflicts = FALSE)
 for(file in list.files(path = "outputs/", 
-                       pattern = ".{11}GPD-fit.{3}.RData")){
-   load(paste0("outputs/",file))
+                       pattern = ".{11}GPD-fit.{3}.RData", 
+                       full.names = TRUE)){
+   load(file)
 }
 
 ids <- with(res_neg,
@@ -118,44 +136,24 @@ g1 <- results[,  "gradshape", ] |>
                values_to = "gradient") |>
   dplyr::mutate(boundary = 
                   factor(rep(results[,  "shape", "mev"] < -0.9999, each = length(unique(package)))),
-                ifelse(is.infinite(gradient), NA, gradient)) |>
-  # filter(boundary == "no") |>
-   dplyr::arrange("package") |>
-  ggplot(mapping = aes(y = package,
-                       x = log(abs(gradient)),
+                gradient = ifelse(is.infinite(gradient), NA, gradient)) |>
+  dplyr::arrange(tolower(package)) |>
+  ggplot(mapping = aes(y = forcats::fct_rev(package),
+                       x = abs(gradient),
                        fill = boundary)) +
-  scale_fill_manual(values = MetBrewer::met.brewer("OKeeffe1",
-                                                   type = "discrete",
-                                                   n = 2)) +
-  ggdist::stat_slab(normalize = "xy", 
-                    limits  = c(-30,30)) +
+  scale_fill_grey() +
+  ggdist::stat_slab(normalize = "xy",
+                    n = 1001,) +
   theme_minimal() +
   theme(legend.position = "none") +
-  labs(x = "log absolute gradient (shape)",
-       y = "") +
-  geom_vline(xintercept = log(0.001))
-
-g2 <- results[,  "gradscale", ] |>
-  tibble::as_tibble() |>
-  tidyr::pivot_longer(cols = tidyselect::everything(),
-               names_to = "package",
-               values_to = "gradient") |>
-  dplyr::mutate(boundary = factor(rep(results[, "shape", "mev"] < -0.9999, each = length(unique(package)))),
-                package = factor(package)) |>
-  # filter(boundary == "no") |>
-  ggplot(mapping = aes(y = package,
-                       x = log(abs(gradient)),
-                       fill = boundary)) +
-  scale_fill_manual(values = MetBrewer::met.brewer("OKeeffe1",
-                                                   type = "discrete",
-                                                   n = 2)) +
-  ggdist::stat_slab(normalize = "xy", limits = c(-30,30)) +
-  theme_minimal() +
-  theme(legend.position = "none") +
-  labs(x = "log absolute gradient (scale)",
-       y = "") +
-  geom_vline(xintercept = log(0.001))
-
+   labs(x = "absolute gradient, shape (log scale)",
+        y = "") +
+   scale_x_log10(labels = scales::label_log(digits = 2),
+                 limits = c(1e-8, 1e2),
+                 oob = scales::squish,
+                 breaks = c(1e-8, 1e-6, 1e-7, 1e-5, 1e-4, 1e-3,  1e-2, 1e-1, 1e0, 1e1),
+                 minor_breaks = c(1e-10,1e-9,1e-8,1e-7,1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2)) +
+   geom_vline(xintercept = 1e-3)
 
 # Find which is the maximum likelihood
 shape_mle <- llmax <- scale_mle <- vector("numeric", 1000L)
@@ -168,30 +166,29 @@ for (i in seq_along(shape_mle)) {
 }
 
 
-g3a <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+g2 <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+  dplyr::select(names(which(apply(abs(results[, "loglik", ] - llmax), 2, quantile, 0.9, na.rm = TRUE) > 1e-4))) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "loglik") |>
+  dplyr::arrange(tolower(package)) |>
   dplyr::filter(rep(results[, "shape", "mev"] >= -0.9999, each = length(unique(package)))) |>
-  # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = abs(loglik), y = package)) +
-  geom_boxplot() +
-  # ggdist::stat_slab() +
+  dplyr::mutate(loglik = ifelse(is.finite(loglik), loglik, NA)) |>
+  ggplot(mapping = aes(x = abs(loglik),
+                       y = forcats::fct_rev(package))) +
+  ggdist::stat_slab(slab_type = "ccdf") +
   theme_classic() +
-  labs(x = "log likelihood difference to MLE",
+  labs(x = "difference to maximum log likelihood",
        y = "")
 
 
-g4a <- tibble::as_tibble(results[,  "shape", ]) |>
+g3 <- tibble::as_tibble(results[,  "shape", ]) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "shape") |>
-  # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = shape, y = package)) +
+  dplyr::arrange(tolower(package)) |>
+  ggplot(mapping = aes(x = shape, y = forcats::fct_rev(package))) +
   ggdist::stat_dots() +
-  # geom_boxplot() +
-  # scale_x_continuous(limits = c(-1, 2)) +
-  # ggdist::stat_halfeye() +
   theme_classic() +
   labs(x = "shape",
        y = "")
@@ -206,30 +203,30 @@ for (i in seq_along(shape_mle)) {
   llmax[i] <- results[i, "loglik", wmax[i]]
 }
 
-g3b <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+g4 <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+  dplyr::select(names(which(apply(abs(results[, "loglik", ] - llmax), 2, quantile, 0.9, na.rm = TRUE) > 1e-4))) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "loglik") |>
+  dplyr::arrange(tolower(package)) |>
   dplyr::filter(rep(results[, "shape", "mev"] >= -0.9999, each = length(unique(package)))) |>
-  # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = abs(loglik), y = package)) +
-  geom_boxplot() +
-  # ggdist::stat_slab() +
+  dplyr::mutate(loglik = ifelse(is.finite(loglik), loglik, NA)) |>
+  ggplot(mapping = aes(x = abs(loglik),
+                       y = forcats::fct_rev(package))) +
+  ggdist::stat_slab(slab_type = "ccdf") +
   theme_classic() +
-  labs(x = "log likelihood difference to MLE",
+  labs(x = "difference to maximum log likelihood",
        y = "")
 
 
-g4b <- tibble::as_tibble(results[,  "shape", ]) |>
+g5 <- tibble::as_tibble(results[,  "shape", ]) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "shape") |>
-  # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = shape, y = package)) +
+  dplyr::arrange(tolower(package)) |>
+  ggplot(mapping = aes(x = shape, 
+                       y = forcats::fct_rev(package))) +
   ggdist::stat_dots() +
-  # geom_boxplot() +
-  # scale_x_continuous(limits = c(-1, 2)) +
-  # ggdist::stat_halfeye() +
   theme_classic() +
   labs(x = "shape",
        y = "")
@@ -237,29 +234,37 @@ g4b <- tibble::as_tibble(results[,  "shape", ]) |>
 
 ```{r}
 #| label: fig-gpfit-grad
-#| fig-cap: "Magnitude of the score vector at the value returned by the optimization routine. The density plots are based on 1000 samples simulated from a generalized Pareto distribution with shape $\\xi =-0.5$ and scale $\\sigma=1000$, split by simulations yielding a boundary case ($\\widehat{\\xi} = -1$, blue) and regular case ($\\widehat{\\xi} > -1$, red); the $y$-axis scale for each package is different to ease visualization. Results for samples for which the numerical routines failed to converge or the gradient is unevaluated are not shown. The vertical line indicates a tolerance of $0.001$"
+#| fig-cap: "Magnitude of the shape component of the score vector at the value returned by the optimization routine. The density plots are based on 1000 samples simulated from a generalized Pareto distribution with shape $\\xi =-0.5$ and scale $\\sigma=1000$, split by simulations yielding a boundary case ($\\widehat{\\xi} = -1$, gray) and regular case ($\\widehat{\\xi} > -1$, black); the $y$-axis scale for each package is different to ease visualization. Results for samples for which the numerical routines failed to converge or the gradient is unevaluated are not shown."
 #| cache: false
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
-g1 + g2
+#| fig-align: 'center'
+#| out-width: '80%'
+#| fig-width: 8
+#| fig-height: 6
+g1
 ```
 
-@fig-gpfit-grad shows the distribution of the score vector, i.e., the gradient of the log likelihood. The latter should vanish when evaluated at the maximum likelihood estimator ($\widehat{\sigma}, \widehat{\xi}$) provided $\widehat{\xi} > -1$. Most instances of non-zero gradient are attributable to boundary cases with $\widehat{\xi}=-1$ not accounted for. Other discrepancies are due to numerical tolerance for convergence, but the differences in log likelihood relative to the maximum over all routines are negligible in most non-boundary cases investigated. Some routines, based on Nelder--Mead simplex algorithm, do not check the gradient. This is immaterial if the value of the function is nearly identical to that of the maximum likelihood.
+@fig-gpfit-grad shows the distribution of the score vector, i.e., the gradient of the log likelihood. The latter should vanish when evaluated at the maximum likelihood estimator ($\widehat{\sigma}, \widehat{\xi}$) provided $\widehat{\xi} > -1$. Most instances of non-zero gradient are attributable to boundary cases with $\widehat{\xi}=-1$ not accounted for. Other discrepancies are due to numerical tolerance for convergence, but the differences in log likelihood relative to the maximum over all routines are negligible in most non-boundary cases investigated. Some routines, based on Nelder--Mead simplex algorithm, do not check the gradient but this is immaterial if the value of the function is nearly identical to that of the maximum likelihood. 
 
 ```{r}
 #| label: fig-gpfit-diffmle
-#| fig-cap: "Difference between likelihood evaluated at parameters returned by routine and the maximum likelihood over all routines for generalized Pareto samples with negative shape (left) and exponential samples (right), both with large scale parameter $\\sigma=1000$. Results for samples for which the numerical routines failed to converge are not shown."
+#| fig-cap: "Difference between likelihood evaluated at parameters returned by routine and the maximum likelihood over all routines for generalized Pareto samples with negative shape (left) and exponential samples (right), both with large scale parameter $\\sigma=1000$. Results for samples for which the numerical routines failed to converge are not shown. Only packages with 90% percentile giving a discrepancy larger than $10^{-4}$ are shown."
 #| cache: false
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
-g3a + g3b
+#| fig-align: 'center'
+#| out-width: '90%'
+#| fig-width: 8
+#| fig-height: 4
+g2 + g4
 ```
 
-@Fig-gpfit-diffmle shows these differences using box-and-whiskers plots, highlighting instances where the package fails to return correct values. Most packages do fine, except for a handful: `evd`, `extRemes` and `POT` stand out of the lot.
+@Fig-gpfit-diffmle shows these differences through survival function plots, highlighting instances where the package fails to return correct values. Most packages do fine, except for a handful: `evd`, `extRemes` and `POT` (which uses routines from `evd`) stand out of the lot.
 
 ```{r}
 #| label: fig-gpfit-shapepar
@@ -269,10 +274,14 @@ g3a + g3b
 #| eval: true
 #| message: false
 #| warning: false
-g4a + g4b
+#| fig-align: 'center'
+#| out-width: '90%'
+#| fig-width: 8
+#| fig-height: 4
+g3 + g5
 ```
 
-We can figure out the source of some of these oddities by plotting the distribution of the shape parameter over all 1000 replications. @fig-gpfit-shapepar: the `QRM` package has unexpected small spread and a positive bias for estimation $\xi$, different from other packages because it fails more often when $\xi$ is negative. Both `ercv` and `extRemes` return routines that terminate at zero, with noticeable point masses at the origin. `Renext` returns a hard-coded lower bound, while only `SpatialExtremes` and `mev` correctly return $\xi=-1$. 
+We can figure out the source of some of these oddities by plotting the distribution of the shape parameter over all 1000 replications. @fig-gpfit-shapepar: the `QRM` package has unexpected small spread and a positive bias for estimation $\xi$, different from other packages because it fails more often when $\xi$ is negative. Both `ercv` and `extRemes`  routines return zero shape estimates, leading to noticeable point masses. `Renext` returns a hard-coded lower bound, while only `SpatialExtremes` and `mev` correctly return $\xi=-1$. 
 
 ```{r}
 #| label: tab-nonconv
@@ -317,14 +326,14 @@ fail_df <- dplyr::bind_rows(.id = "shape",
                             pos = nonconv_pos)
 # knitr::kable(fail_df, row.names = "n", col.names = c("shape","package"))
 fail_qrm <- as.integer(unlist((fail_df |> dplyr::filter(shape == "neg", package == "QRM") |> dplyr::select(nfail))))
-fail_evir <- as.integer(fail_df |> dplyr::filter(shape == "neg", n == "20", package == "evir") |> dplyr::select(nfail))
+fail_evir <- as.integer(fail_df |> dplyr::filter(shape == "neg", n == "20", package == "evir") |> dplyr::select(nfail)) 
 ```
 
-Some package have routines that fail to converge often when the shape is negative; the most likely culprit for this is poor starting values. The routines in `ercv` and `fExtremes` (same as `evir`) fail often in small samples: for $n=20$ exceedances, the function returned an error in `r fail_evir[1]` simulations. For the latter, the error is due to poor implementation of the log-likelihood that leads to infinite finite differences between estimates. For `QRM`, the choice of starting values, which cannot be modified by the user, is not adequate with strong negative shapes: it failed more than `r fail_qrm[1]` ($n=20$), `r fail_qrm[2]` ($n=50$), `r fail_qrm[3]` ($n=100$) and `r fail_qrm[4]` ($n=1000$) for negative shapes, indicating that the issue is not sample size. The `qrmtools` package, which supersedes `QRM`, has no such problems.
+Some package have routines that fail to converge often when the shape is negative; the most likely culprit for this is poor starting values. The routines in `ercv` and `fExtremes` (same as `evir`) fail often in small samples: for $n=20$ exceedances, the function returned an error in `r fail_evir[1]` simulations. For the latter, the error is due to poor implementation of the log-likelihood that leads to infinite finite differences between estimates. For `QRM`, the choice of starting values, which cannot be modified by the user, is not adequate with strong negative shapes: it failed more than `r fail_qrm[1]` ($n=20$), `r fail_qrm[2]` ($n=50$), `r fail_qrm[3]` ($n=100$) and `r fail_qrm[4]` ($n=1000$) times for negative shapes, indicating that the issue is not sample size. The `qrmtools` package, which supersedes `QRM`, has no such problems.
 
 ### Generalized extreme value distribution
 
-By contrast, the optimization routines for the generalized extreme value distribution are better behaved and nearly all packages give identical results: only `evd` and `texmex` failed to converge and returned abnormally high shape values in a handful of instances out of 1000 simulations.
+The optimization routines for the generalized extreme value distribution are better behaved and nearly all packages give identical results: only `evd` and `texmex` failed to converge and returned abnormally high shape values in a handful of instances out of 1000 simulations.
 
 
 ```{r}
@@ -335,59 +344,12 @@ By contrast, the optimization routines for the generalized extreme value distrib
 #| message: false
 #| warning: false
 for(file in list.files(path = "outputs/", 
-                       pattern = ".{11}GEV-fit-.{3}.RData")){
-   load(paste0("outputs/",file))
+                       pattern = ".{11}GEV-fit-.{3}.RData",
+                       full.names = TRUE)){
+   load(file)
 }
 results <- res_neg[, "n20",, ]
-# 
-# g1 <- results[,  "gradshape", ] |>
-#   tibble::as_tibble() |>
-#   tidyr::pivot_longer(cols = tidyselect::everything(),
-#                names_to = "package",
-#                values_to = "gradient") |>
-#   dplyr::mutate(boundary = 
-#                   factor(rep(results[,  "shape", "mev"] < -0.9999, each = length(unique(package)))),
-#                 gradient = ifelse(is.infinite(gradient) | abs(gradient) > 1e10, NA, gradient)) |>
-#   # filter(boundary == "no") |>
-#   ggplot(mapping = aes(y = package,
-#                        x = log(abs(gradient)),
-#                        fill = boundary)) +
-#   scale_fill_manual(values = MetBrewer::met.brewer("OKeeffe1",
-#                                                    type = "discrete",
-#                                                    n = 2)) +
-#   ggdist::stat_slab(normalize = "xy", 
-#                     limits  = c(-30,30)) +
-#   theme_minimal() +
-#   theme(legend.position = "none") +
-#   labs(x = "log absolute gradient (shape)",
-#        y = "") +
-#   geom_vline(xintercept = log(0.001))+
-#   scale_x_continuous(limits = c(-10,10))
-# 
-# g2 <- results[,  "gradscale", ] |>
-#   tibble::as_tibble() |>
-#   tidyr::pivot_longer(cols = tidyselect::everything(),
-#                names_to = "package",
-#                values_to = "gradient") |>
-#   dplyr::mutate(boundary = factor(rep(results[, "shape", "mev"] < -0.9999, each = length(unique(package)))),
-#                 package = factor(package)) |>
-#   # filter(boundary == "no") |>
-#   ggplot(mapping = aes(y = package,
-#                        x = log(abs(gradient)),
-#                        fill = boundary)) +
-#   scale_fill_manual(values = MetBrewer::met.brewer("OKeeffe1",
-#                                                    type = "discrete",
-#                                                    n = 2)) +
-#   ggdist::stat_slab(normalize = "xy", limits = c(-30,30)) +
-#   theme_minimal() +
-#   theme(legend.position = "none") +
-#   labs(x = "log absolute gradient (scale)",
-#        y = "") +
-#   geom_vline(xintercept = log(0.001)) +
-#   scale_y_continous(limits = c(-10,5))
 
-
-# Find which is the maximum likelihood
 shape_mle <- llmax <- scale_mle <- vector("numeric", 1000L)
 wmax <- vector("integer", 1000L)
 for (i in seq_along(shape_mle)) {
@@ -398,28 +360,28 @@ for (i in seq_along(shape_mle)) {
 }
 
 
-g3a <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+g6 <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+  dplyr::select(names(which(apply(abs(results[, "loglik", ] - llmax), 2, quantile, 0.9, na.rm = TRUE) > 1e-4))) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "loglik") |>
+  dplyr::arrange(tolower(package)) |>
   dplyr::filter(rep(results[, "shape", "mev"] >= -0.9999, each = length(unique(package)))) |>
-  ggplot(mapping = aes(x = abs(loglik), y = package)) +
-  geom_boxplot() +
-  # ggdist::stat_slab() +
+  dplyr::mutate(loglik = ifelse(is.finite(loglik), loglik, NA)) |>
+  ggplot(mapping = aes(x = abs(loglik),
+                       y = forcats::fct_rev(package))) +
+  ggdist::stat_slab(slab_type = "ccdf", limits = c(0, 8)) +
   theme_classic() +
-  labs(x = "log likelihood difference to MLE",
-       y = "") + 
-  scale_x_continuous(limits = c(0, 15))
-g4a <- tibble::as_tibble(results[,  "shape", ]) |>
+  labs(x = "difference to maximum log likelihood",
+       y = "") +
+  scale_x_continuous(limits = c(0, 8))
+g7 <- tibble::as_tibble(results[,  "shape", ]) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "shape") |>
-  # filter(package != "tea") |> # outlier
+  dplyr::arrange(tolower(package)) |>
   ggplot(mapping = aes(x = shape, y = package)) +
   ggdist::stat_dots() +
-  # geom_boxplot() +
-  # scale_x_continuous(limits = c(-1, 2)) +
-  # ggdist::stat_halfeye() +
   theme_classic() +
   labs(x = "shape",
        y = "") +
@@ -437,25 +399,27 @@ for (i in seq_along(shape_mle)) {
   llmax[i] <- results[i, "loglik", wmax[i]]
 }
 
-g3b <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+g8 <- tibble::as_tibble(results[, "loglik", ] - llmax) |>
+  dplyr::select(names(which(apply(abs(results[, "loglik", ] - llmax), 2, quantile, 0.9, na.rm = TRUE) > 1e-4))) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "loglik") |>
+  dplyr::arrange(tolower(package)) |>
   dplyr::filter(rep(results[, "shape", "mev"] >= -0.9999, each = length(unique(package)))) |>
-  # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = abs(loglik), y = package)) +
-  geom_boxplot() +
-  # ggdist::stat_slab() +
+  dplyr::mutate(loglik = ifelse(is.finite(loglik), loglik, NA)) |>
+  ggplot(mapping = aes(x = abs(loglik),
+                       y = forcats::fct_rev(package))) +
+  ggdist::stat_slab(slab_type = "ccdf") +
   theme_classic() +
-  labs(x = "log likelihood difference to MLE",
-       y = "") +
-  scale_x_continuous(limits = c(0,15))
+  labs(x = "difference to maximum log likelihood",
+       y = "")
 
 
-g4b <- tibble::as_tibble(results[,  "shape", ]) |>
+g9 <- tibble::as_tibble(results[,  "shape", ]) |>
   tidyr::pivot_longer(cols = tidyselect::everything(),
                names_to = "package",
                values_to = "shape") |>
+  dplyr::arrange(tolower(package)) |>
   # filter(package != "tea") |> # outlier
   ggplot(mapping = aes(x = shape, y = package)) +
   ggdist::stat_dots() +
@@ -472,17 +436,36 @@ g4b <- tibble::as_tibble(results[,  "shape", ]) |>
 
 ```{r}
 #| label: fig-gevfit-diffmle
-#| fig-cap: "Difference between likelihood evaluated at parameters returned by routine and the maximum likelihood over all routines for generalized extreme value samples with negative shape (left) and exponential samples (right), both with large scale parameter $\\sigma=1000$. Results for samples for which the numerical routines failed to converge are not shown."
+#| fig-cap: "Difference between likelihood evaluated at parameters returned by routine and the maximum likelihood over all routines for generalized extreme value samples with negative shape (left) and exponential samples (right), both with large scale parameter $\\sigma=1000$. Results for samples for which the numerical routines failed to converge are not shown.  Only packages with 90% percentile giving a discrepancy larger than $10^{-4}$ are shown."
 #| cache: false
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
-g3a + g3b
+#| fig-align: 'center'
+#| out-width: '90%'
+#| fig-width: 8
+#| fig-height: 4
+g6 + g8
 ```
 
-Unsurprisingly, the portrait is the same for the generalized extreme value distribution when it comes to boundary constraints: `climextRemes` does not return shapes less than $-1$, `extRemes` has odd behaviour with a visible point mass at $\xi=0$ in the simulations, even when this value has measure zero. Only `mev` and `SpatialExtremes` handle the boundary constraints. @fig-gevfit-diffmle shows the difference in maximum likelihood returned by the packages, excluding cases with $\widehat{\xi}=-1$ for which the log likelihood becomes unbounded for combinations of $\sigma$ and $\xi<-1$. Some packages, such as `evd`, also sometimes return local optimum and this in turn leads to erroneous comparisons of nested models.
+Unsurprisingly, the portrait is the same for the generalized extreme value distribution when it comes to boundary constraints: for example, `climextRemes` does not return shapes less than or equal to $-1$. `extRemes` has odd behaviour with a visible point mass at $\xi=0$ in the simulations, even when this value has measure zero. Only `mev` and `SpatialExtremes` handle the boundary constraints. @fig-gevfit-diffmle shows the difference in maximum likelihood returned by the packages, excluding cases with $\widehat{\xi}=-1$ for which the log likelihood becomes unbounded for combinations of $\sigma$ and $\xi<-1$. Some packages, such as `evd`, also sometimes return local optimum (perhaps due to use of the BFGS routine) and this in turn leads to erroneous comparisons of nested models.
 
+
+```{r}
+#| label: fig-gevfit-shapepar
+#| fig-cap: "Dot plots of shape parameters returned by optimization routine for generalized extreme value samples with negative shape (left) and Gumbel samples (right). Results for samples for which the numerical routines failed to converge are not shown."
+#| cache: false
+#| echo: false
+#| eval: true
+#| message: false
+#| warning: false
+#| fig-align: 'center'
+#| out-width: '90%'
+#| fig-width: 8
+#| fig-height: 4
+g7 + g9
+```
 
 
 ```{r}
@@ -499,8 +482,9 @@ Unsurprisingly, the portrait is the same for the generalized extreme value distr
 #| message: false
 #| error: false
 for(file in list.files(path = "outputs/", 
-                       pattern = ".{11}GEV-fit-.{3}.RData")){
-   load(paste0("outputs/",file))
+                       pattern = ".{11}GEV-fit-.{3}.RData",
+                       full.names = TRUE)){
+   load(file)
 }
 nonconv_neg <- apply(res_neg[,, "shape",], 2:3, function(x){sum(is.na(x))})
 nonconv_neg <- nonconv_neg[,colSums(nonconv_neg)>0] |>
@@ -511,7 +495,9 @@ nonconv_neg <- nonconv_neg[,colSums(nonconv_neg)>0] |>
   # tidyr::pivot_longer(cols = -1,
   #                     names_to = "package",
   #                     values_to = "nfail")
-knitr::kable(nonconv_neg)
+knitr::kable(nonconv_neg,
+             booktabs = TRUE) |>
+  kableExtra::kable_styling()
 nonconv_zer <- apply(res_zer[,, "shape",], 2:3, function(x){sum(is.na(x))})
 nonconv_zer <- nonconv_zer[,colSums(nonconv_zer)>0] |>
   tibble::as_tibble(rownames = "n") |>
@@ -521,7 +507,9 @@ nonconv_zer <- nonconv_zer[,colSums(nonconv_zer)>0] |>
   # tidyr::pivot_longer(cols = -1,
   #                     names_to = "package",
   #                     values_to = "nfail")
-knitr::kable(nonconv_zer)
+knitr::kable(nonconv_zer,
+             booktabs = TRUE) |>
+  kableExtra::kable_styling()
 nonconv_pos <- apply(res_pos[,, "shape",], 2:3, function(x){sum(is.na(x))})
 nonconv_pos <- nonconv_pos[,colSums(nonconv_pos)>0] |>
   tibble::as_tibble(rownames = "n") |>
@@ -535,6 +523,11 @@ nonconv_pos <- nonconv_pos[,colSums(nonconv_pos)>0] |>
 #                             neg = nonconv_neg, 
 #                             zero = nonconv_zer, 
 #                             pos = nonconv_pos)
-knitr::kable(nonconv_pos)
+knitr::kable(nonconv_pos,
+             booktabs = TRUE) |>
+  kableExtra::kable_styling()
 ```
-Relative to the generalized Pareto case, there are more instances of failure to converge, but these are restricted to a negligible number of cases except for negative shape with `QRM`: see @tbl-gevnonconv for a breakdown by package and sample size. 
+
+
+
+ @tbl-gevnonconv  gives a breakdown of the number of instances for which the maximisation routine failed: two packages, `climextRemes` and `EnvStats`, stand out for negative shapes and the percentage of failures increases with the sample size. 

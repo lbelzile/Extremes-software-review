@@ -1,5 +1,7 @@
-
-setwd(here::here())
+if (!"this.path" %in% installed.packages()[, "Package"]){
+  install.packages("this.path")
+}
+setwd(this.path::here())
 nrep <- 1000L
 source("utility-fun-maxblock.R")
 if(!dir.exists("outputs")){
@@ -37,7 +39,7 @@ gevpkglist <- cbind(
                NA, NA, NA, NA,NA, NA, NA),
   outputS3 = c("mle", "estimate", "par.ests", NA, "results",
                "par.ests", "mle", NA, "par.ests", NA,
-               NA, "coefficients", NA, "param","par", "parameters", NA),
+               NA, "coefficients", NA, "param","par", "parameters", "est"),
   outputS3par = c(NA, NA, NA, NA, "par",
                   NA, NA, NA, NA, NA,
                   NA, NA, NA, NA, NA, NA))
@@ -89,7 +91,7 @@ rlgamma <- function(n, shape, rate){
    exp(rgamma(n = n, shape = shape, rate = rate))
 }
 rgev <- evd::rgev
-
+set.seed(202304)
 time_pos <- system.time(
    res_pos <- check_gev_varyingsize(n = n2,
                                           blocksize = 1L,
@@ -115,7 +117,7 @@ print(time_pos)
 cat("\n******************************\n")
 cat("***\t\t GEV fit 2 check\t\t***\n")
 
-
+set.seed(202304)
 time_zer <- system.time(
   res_zer <- check_gev_varyingsize(n = n2,
                                    blocksize = 1L,#c(10L, 25L, 50L),
@@ -139,7 +141,7 @@ print(time_zer)
 cat("\n******************************\n")
 cat("***\t\t GEV fit 3 check\t\t***\n")
 
-
+set.seed(202304)
 time_neg <- system.time(
   res_neg <- check_gev_varyingsize(n = n2,
                                     blocksize = 1L,

@@ -1,10 +1,15 @@
 #| label: extremes_benchmark_setup
-#| cache: false
-#| cache.lazy: false
 #| echo: false
 #| message: false
 #| error: false
 #| warning: false
+if (!"this.path" %in% installed.packages()[, "Package"]){
+  install.packages("this.path")
+}
+setwd(this.path::here())
+if(!dir.exists("outputs")){
+ mkdir("outputs")
+}
 data(venice, package = "mev")
 data(eskrain, package = "mev")
 suppressPackageStartupMessages(library(cmdstanr))
@@ -14,103 +19,105 @@ sm2 <-  cmdstan_model("gpd.stan")
 
 
 #| label: extremes_benchmark1
-#| cache: true
-#| cache.lazy: false
 #| echo: false
 #| message: true
 #| warning: false
 #| error: false
-#| cache.path: "cache/"
 set.seed(12345)
-benchmark1 <- 
-  bench::mark(iterations = 100,
-            filter_gc = TRUE,
-            check = FALSE,
-texmex = texmex::evm(
-  y = r1, 
-  mu = ~ scale(year),
-  data = venice, 
-  burn = 1000,
-  iter  = 4.1e4,
-  family = texmex::gev, 
-  method = "sim",
-  verbose = FALSE),
-extRemes = {
-  prelim_opt <- extRemes::fevd(
-    x = r1,
-    data = venice[,1:2],
-    location.fun = ~scale(year),
-    type = "GEV", 
-    use.phi = TRUE,
-    method = "MLE")
-
-# Initial trials with the default parameter revealed
-# problems: while the model starts at the MLE (so close to the stationary), the default standard deviation of the normal random walk proposals are particulary ill-suited to this example.
-extRemes <- extRemes::fevd(
-    x = r1,
-    data = venice[,1:2],
-    location.fun = ~scale(year),
-    type = "GEV", 
-    use.phi = TRUE,
-    method = "Bayesian",
-    iter = 4e4L+1e3L,
-    priorParams = list(
-      m = rep(0,4),
-      v = c(1000, 1000, 1000, 1)
-      ),
-    proposalParams = list(
-      mean = rep(0,4),
-      sd = sqrt(diag(solve(prelim_opt$results$hessian)))
-      )
-)
-},
-evdbayes = {
-  prelim_opt <- with(venice, evd::fgev(
-    x = r1, 
-    nsloc = data.frame(x = scale(year)))
+if(file.exists("outputs/benchmark1.RData")){
+  load("outputs/benchmark1.RData")
+} else{
+  benchmark1 <- 
+    bench::mark(iterations = 100,
+              filter_gc = TRUE,
+              check = FALSE,
+  texmex = texmex::evm(
+    y = r1, 
+    mu = ~ scale(year),
+    data = venice, 
+    burn = 1000,
+    iter  = 4.1e4,
+    family = texmex::gev, 
+    method = "sim",
+    verbose = FALSE),
+  extRemes = {
+    prelim_opt <- extRemes::fevd(
+      x = r1,
+      data = venice[,1:2],
+      location.fun = ~scale(year),
+      type = "GEV", 
+      use.phi = TRUE,
+      method = "MLE")
+  
+  # Initial trials with the default parameter revealed
+  # problems: while the model starts at the MLE (so close to the stationary), the default standard deviation of the normal random walk proposals are particulary ill-suited to this example.
+  extRemes <- extRemes::fevd(
+      x = r1,
+      data = venice[,1:2],
+      location.fun = ~scale(year),
+      type = "GEV", 
+      use.phi = TRUE,
+      method = "Bayesian",
+      iter = 4e4L+1e3L,
+      priorParams = list(
+        m = rep(0,4),
+        v = c(1000, 1000, 1000, 1)
+        ),
+      proposalParams = list(
+        mean = rep(0,4),
+        sd = sqrt(diag(solve(prelim_opt$results$hessian)))
+        )
   )
-  evdbayes::posterior(
-  n = 4e4L+999,
-  init = prelim_opt$estimate[c(1,3,4,2)],
-  psd = prelim_opt$std.err[c(1,3,4,2)],
-  lh = "gev",
-  data = venice$r1,
-  burn = 1000L,
-  thin = 4,
-  trend = scale(venice$year),
-  prior = evdbayes::prior.norm(trendsd = 5,
-                     mean = rep(0,3),
-                     cov = diag(c(1000,1000,1)))
-    
-)
-},
-stan ={ 
-  prelim_opt <- with(venice, evd::fgev(
-    x = r1, 
-    nsloc = data.frame(x = scale(year)))
+  },
+  evdbayes = {
+    prelim_opt <- with(venice, evd::fgev(
+      x = r1, 
+      nsloc = data.frame(x = scale(year)))
+    )
+    evdbayes::posterior(
+    n = 4e4L+999,
+    init = prelim_opt$estimate[c(1,3,4,2)],
+    psd = prelim_opt$std.err[c(1,3,4,2)],
+    lh = "gev",
+    data = venice$r1,
+    burn = 1000L,
+    thin = 4,
+    trend = scale(venice$year),
+    prior = evdbayes::prior.norm(trendsd = 5,
+                       mean = rep(0,3),
+                       cov = diag(c(1000,1000,1)))
+      
   )
-  invisible(capture.output( 
-  suppressWarnings(
-    sm1$sample(data = list(N = nrow(venice),
-                  p_loc = 2L,
-                  priorvar = c(100,100,1),
-                  p_scale = 1L,
-                  y = venice$r1,
-                  X_loc = cbind(rep(1, nrow(venice)),
-                                scale(venice$year)),
-                  X_scale = cbind(rep(1, nrow(venice)))),
-                init = list(list(beta_loc = c(1.42011,1.35351),
-                                 beta_scale = c(0.96582),
-                                 xi = 0.04071)),
-                 chains = 1,
-                 parallel_chains = 1L,
-                 iter_warmup = 500L,
-                 iter_sampling = 1e4L,
-                 refresh = 0L, # don't print progress
-                 show_messages = FALSE))))
-},
-
-)
+  },
+  stan ={ 
+    prelim_opt <- with(venice, evd::fgev(
+      x = r1, 
+      nsloc = data.frame(x = scale(year)))
+    )
+    invisible(capture.output( 
+    suppressWarnings(
+      sm1$sample(data = list(N = nrow(venice),
+                    p_loc = 2L,
+                    priorvar = c(100,100,1),
+                    p_scale = 1L,
+                    y = venice$r1,
+                    X_loc = cbind(rep(1, nrow(venice)),
+                                  scale(venice$year)),
+                    X_scale = cbind(rep(1, nrow(venice)))),
+                  init = list(list(beta_loc = c(1.42011,1.35351),
+                                   beta_scale = c(0.96582),
+                                   xi = 0.04071)),
+                   chains = 1,
+                   parallel_chains = 1L,
+                   iter_warmup = 500L,
+                   iter_sampling = 1e4L,
+                   refresh = 0L, # don't print progress
+                   show_messages = FALSE))))
+  },
+  
+  )
+  save(benchmark1, file = "outputs/benchmark1.RData", version = 2)
+}
 
 
 #| label: extremes_benchmark2
@@ -118,58 +125,60 @@ stan ={
 #| message: false
 #| warnings: false
 #| error: false
-#| cache: true
-#| cache.lazy: false
-#| cache.path: "cache/"
 set.seed(12345)
-benchmark2 <- 
-  suppressWarnings(bench::mark(iterations = 100,
-            filter_gc = FALSE,
-            check = FALSE,
-texmex = texmex::evm(
-  y = eskrain, 
-  th = 30, 
-  family = texmex::gpd, 
-  method = "sim",
-  verbose = FALSE),
-revdbayes = revdbayes::rpost_rcpp(
-  n = 1e4L, 
-  model = "gp", 
-  data = eskrain, 
-  thresh = 30, 
-  prior = revdbayes::set_prior(prior = "norm", 
-                               model = "gp", 
-                               mean = rep(0,2),
-                               cov = diag(c(1000,1)))
-),
-MCMC4Extremes = invisible(capture.output(
-  mod2_MCMC4_s = MCMC4Extremes::gpdp(
+if(file.exists("outputs/benchmark2.RData")){
+  load("outputs/benchmark2.RData")
+} else{
+  benchmark2 <- 
+    suppressWarnings(bench::mark(iterations = 100,
+              filter_gc = FALSE,
+              check = FALSE,
+  texmex = texmex::evm(
+    y = eskrain, 
+    th = 30, 
+    family = texmex::gpd, 
+    method = "sim",
+    verbose = FALSE),
+  revdbayes = revdbayes::rpost_rcpp(
+    n = 1e4L, 
+    model = "gp", 
     data = eskrain, 
-    threshold = 30, 
-    int = 1e4L))), # this prints the whole progression!
-
-extRemes = extRemes::fevd(
-    x = as.vector(eskrain),
-    threshold = 30,
-    type = "GP", 
-    use.phi = TRUE,
-    method = "Bayesian",
-    iter = 1e4L+500L),
-stan = {invisible(capture.output( 
-  suppressWarnings(
-  sm2$sample(data = list(
-                           N = length(eskrain),
-                           thresh = 30,
-                           y = as.vector(eskrain)),
-                 chains = 1,
-                 parallel_chains = 1L,
-                 iter_warmup = 500L,
-                 iter_sampling = 1e4L,
-                 refresh = 0L, # don't print progress
-                 show_messages = FALSE)
-)))
+    thresh = 30, 
+    prior = revdbayes::set_prior(prior = "norm", 
+                                 model = "gp", 
+                                 mean = rep(0,2),
+                                 cov = diag(c(1000,1)))
+  ),
+  MCMC4Extremes = invisible(capture.output(
+    mod2_MCMC4_s = MCMC4Extremes::gpdp(
+      data = eskrain, 
+      threshold = 30, 
+      int = 1e4L))), # this prints the whole progression!
+  
+  extRemes = extRemes::fevd(
+      x = as.vector(eskrain),
+      threshold = 30,
+      type = "GP", 
+      use.phi = TRUE,
+      method = "Bayesian",
+      iter = 1e4L+500L),
+  stan = {invisible(capture.output( 
+    suppressWarnings(
+    sm2$sample(data = list(
+                             N = length(eskrain),
+                             thresh = 30,
+                             y = as.vector(eskrain)),
+                   chains = 1,
+                   parallel_chains = 1L,
+                   iter_warmup = 500L,
+                   iter_sampling = 1e4L,
+                   refresh = 0L, # don't print progress
+                   show_messages = FALSE)
+  )))
+  }
+  ))
+  save(benchmark2, file = "outputs/benchmark2.RData", version = 2)
 }
-))
 
 
 #| label: fig-benchmark
@@ -203,13 +212,14 @@ g1 + g2
 #| label: evaless
 #| echo: false
 #| eval: true
-#| cache: true
-#| cache.lazy: false
 #| message: false
 #| warning: false
 #| error: false
 #| results: 'hide'
-#| include: false
+set.seed(12345)
+if(file.exists("outputs/ESS.RData")){
+  load("outputs/ESS.RData")
+} else{
 set.seed(12345)
 mod1_texmex <- texmex::evm(
   y = r1, 
@@ -369,6 +379,14 @@ stan_ess1 <- coda::effectiveSize(
 stan_ess2 <- coda::effectiveSize(
   coda::as.mcmc(matrix(as.numeric(mod2_stan$draws(inc_warmup = FALSE)[,1,-1]), ncol = 2L)))/1e4
 # Since we can run independent chains, we could easily compute the effective sample size with multiple chains
+
+save(stan_ess1, stan_ess2, evdbayes_ess1,
+     extRemes_ess2, extRemes_ess1,
+     MCMC4_ess2, texmex_ess1, texmex_ess2,
+     file = "outputs/ESS.RData",
+     version = 2)
+}
+
 
 
 #| label: tbl-ess

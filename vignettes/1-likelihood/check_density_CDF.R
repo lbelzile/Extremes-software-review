@@ -1,4 +1,7 @@
-setwd(here::here())
+if (!"this.path" %in% installed.packages()[, "Package"]){
+  install.packages("this.path")
+}
+setwd(this.path::here())
 source("utility-fun.R")
 if (!dir.exists("outputs")) {
   dir.create("outputs")
@@ -46,7 +49,7 @@ gpdpkglist <- cbind(
     "gpd",
     "gpd",
     "gpd",
-    NA,
+    "gp",
     "gpd",
     NA,
     "gpa",
@@ -69,7 +72,7 @@ gpdpkglist <- cbind(
     "loc",
     "u",
     "loc",
-    NA,
+    "loc",
     "loc",
     NA,
     "xi",
@@ -599,7 +602,8 @@ gevpkglist <- cbind(
     "TLMoments",
     "qrmtools",
     "EnvStats",
-    "ExtremalDep"
+    "ExtremalDep",
+    "mev"
   ) ,
   fun = c(
     NA,
@@ -617,7 +621,8 @@ gevpkglist <- cbind(
     "gev",
     "GEV",
     "gevd",
-    "GEV"
+    "GEV",
+    "gev"
   ),
   location = c(
     "location",
@@ -635,6 +640,7 @@ gevpkglist <- cbind(
     "loc",
     "loc",
     "location",
+    "loc",
     "loc"
   ),
   scale = c(
@@ -650,6 +656,7 @@ gevpkglist <- cbind(
     "scale",
     "scale",
     "sigma",
+    "scale",
     "scale",
     "scale",
     "scale",
@@ -671,6 +678,7 @@ gevpkglist <- cbind(
     "shape",
     "shape",
     "shape",
+    "shape",
     "shape"
   ),
   fit = c(
@@ -689,7 +697,8 @@ gevpkglist <- cbind(
     NA,
     "fit_GEV_MLE",
     "egevd",
-    "fGEV"
+    "fGEV",
+    "fit.gev"
   ),
   argdata = c(
     "y",
@@ -707,11 +716,12 @@ gevpkglist <- cbind(
     NA,
     "x",
     "x",
-    "data"
+    "data",
+    "xdat"
   ),
   outputS4 = c(NA, NA, NA, NA, NA,
                "fit", NA, NA, NA, NA,
-               NA, NA, NA, NA, NA, NA),
+               NA, NA, NA, NA, NA, NA, NA),
   outputS3 = c(
     "mle",
     "estimate",
@@ -728,11 +738,12 @@ gevpkglist <- cbind(
     NA,
     "par",
     "parameters",
-    "est"
+    "est",
+    "par"
   ),
   outputS3par = c(NA, NA, NA, NA, "par",
                   NA, NA, NA, NA, NA,
-                  NA, NA, NA, NA, NA, NA)
+                  NA, NA, NA, NA, NA, NA, NA)
 )
 
 gevothpar.dist <- list(extRemes = list("type" = "GEV"))
@@ -1029,7 +1040,7 @@ code_cdf_valid <- ifelse(!zero_below_loc & !at_loc,
                                        ), 5, 4))))
 gevpkglist <- as.data.frame(gevpkglist)
 gevpkglist$"distribution comment" <-
-  c("incorrect for x < = loc",
+  c("incorrect for x <= loc",
     "incorrect for x < loc",
     "incorrect for x = loc",
     "correct",
