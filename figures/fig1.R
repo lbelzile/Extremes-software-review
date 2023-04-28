@@ -1,3 +1,4 @@
+setwd(this.path::here())
 # Load libraries
 library(ggplot2)
 library(patchwork)
@@ -5,8 +6,7 @@ library(mev)
 set.seed(1234)
 dat <- mev::rgp(n = 10, shape = -0.8)
 fitted <- mev::fit.gpd(dat, threshold = 0, show = TRUE)
-# Empirical coefficient of variation
-# Theoretical quantity defined as standard deviation/mean
+# Coefficient of variation is standard deviation/mean
 sd(dat)/mean(dat)
 
 
@@ -48,7 +48,9 @@ ll <- ll[sub]
 mllbound <- mev::gpd.ll(dat = dat, par = c(max(dat),-1))
 mll <- pmax(max(ll, na.rm = TRUE), mllbound)
 
-g1 <- ggplot(data = data.frame(eta = etagrid, cll = ll-mll),
+g1 <- ggplot(data = data.frame(
+   eta = c(etagrid, 1/max(dat)), 
+   cll = c(ll, mllbound) - mll),
        mapping = aes(x = eta, y = cll)) +
   geom_line()  +
   geom_point(data = data.frame(x = 1/max(dat), y = mllbound - mll),
@@ -77,9 +79,14 @@ ll <- ll[sub]
 mllbound <- mev::gpd.ll(dat = dat, par = c(max(dat),-1))
 mll <- pmax(max(ll, na.rm = TRUE), mllbound)
 # Update profile plot
-g1 <- g1 + geom_line(data = data.frame(eta = etagrid, cll = ll-mll),
-mapping = aes(x = eta, y = cll), col = "gray") +
-  geom_point(data = data.frame(x = 1/max(dat), y = mllbound - mll),
+g1 <- g1 + geom_line(
+   data = data.frame(eta = c(etagrid, 1/max(dat)),
+                     cll = c(ll, mllbound) - mll),
+   mapping = aes(x = eta, 
+                 y = cll), 
+   col = "gray") +
+  geom_point(data = data.frame(x = 1/max(dat), 
+                               y = mllbound - mll),
              aes(x = x, y = y),
              col = "gray")
 
@@ -150,27 +157,38 @@ g2 <- ggplot(data = data.frame(loc = rep(loc_v, each = length(shape_v)),
 g1t <- g1 + labs(
   x = expression(eta),
   y = "profile log likelihood") +
-  scale_y_continuous(limits = c(-7,0),
-                     breaks = seq(-8L, 0, by = 2L),
-                     labels = paste0("$",seq(-8L, 0, by = 2L),"$")) +
-  scale_x_continuous(limits = c(-5,1),
-                     breaks = seq(-5L, 1L, by=1L),
-                     labels = paste0("$",seq(-5L, 1L, by=1L),"$"))
+  scale_y_continuous(limits = c(-7,0.2),
+                     # labels = paste0("$",seq(-8L, 0, by = 2L),"$")
+                     breaks = seq(-8L, 0, by = 2L)
+                     ) +
+  scale_x_continuous(limits = c(-3,1.1),
+                     # labels = paste0("$",seq(-5L, 1L, by=1L),"$")
+                     breaks = seq(-5L, 1L, by = 1L)
+                     )
 
 g2t <- g2 +
   labs(y = expression(mu), 
        x = expression(xi)) +
-  scale_y_continuous(expand = c(0,0),
+  scale_y_continuous(expand = c(0, 0),
                      limits = range(loc_v),
-                     breaks = -2:3,
-                     labels = paste0("$",-2:3,"$")
+                     # labels = paste0("$",-2:3,"$"),
+                     breaks = -2:3
   ) +
-  scale_x_continuous(expand = c(0,0),
+  scale_x_continuous(expand = c(0, 0),
                      limits = range(shape_v),
-                     breaks = seq(-1,1,by=0.5),
-                     labels = paste0("$",c(-1,-0.5,0,0.5,1),"$")
+                     # labels = paste0("$",c(-1,-0.5,0,0.5,1),"$"),
+                     breaks = seq(-1, 1, by = 0.5)
   )
 
+
 pdf("fig1_univariate.pdf", width = 9, height = 4)
-g1 + g2
+g1t + g2t
+dev.off()
+
+png("fig1_univariate.png", width = 9, 
+    height = 4, 
+    res = 300,
+    units = "in",
+    type = "cairo-png")
+g1t + g2t
 dev.off()

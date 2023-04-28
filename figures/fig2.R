@@ -1,8 +1,9 @@
+setwd(this.path::here())
 library(ggplot2)
 library(patchwork)
 library(tidyverse)
 
-setwd(here::here())
+
 # Load results from simulation study
 # Fitting generalized Pareto to 1000 
 # simulated Gamma samples of size 200 to 9000
@@ -53,8 +54,7 @@ g2 <- results[,  "gradshape", ] |>
                  oob = scales::squish,
                  breaks = c(1e-8, 1e-6, 1e-7, 1e-5, 1e-4, 1e-3,  1e-2, 1e-1, 1e0, 1e1),
                  minor_breaks = c(1e-10,1e-9,1e-8,1e-7,1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1e0, 1e1, 1e2)) +
-   geom_vline(xintercept = 1e-3) +
-  theme_classic()
+  theme_minimal()
 
 # Find which is the maximum likelihood
 shape_mle <- llmax <- scale_mle <- vector("numeric", 1000L)
@@ -81,3 +81,11 @@ pdf("fig2_GP-gamma_20exc.pdf",
 g1 + g2
 dev.off()
 
+png("fig2_GP-gamma_20exc.png", 
+    width = 9, 
+    height = 4, 
+    res = 300,
+    units = "in",
+    type = "cairo-png")
+g1 + g2
+dev.off()
