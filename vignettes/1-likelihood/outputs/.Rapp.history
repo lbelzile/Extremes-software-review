@@ -1,0 +1,14 @@
+load("/Users/dutang/drop-local/Dropbox/extremes_software_review/vignettes/1-likelihood/outputs/2022_03_01_GEV-fit-zer.RData")
+res_zer
+str(res_zer)
+dimnames(res_zer)
+load("/Users/dutang/drop-local/Dropbox/extremes_software_review/vignettes/1-likelihood/outputs/2023_04_06_GPD-fitexp.RData")
+res_exp$noncvg
+res_exp$noncvg[,,"QRM"]
+load("/Users/dutang/drop-local/Dropbox/extremes_software_review/vignettes/1-likelihood/outputs/2023_04_06_GPD-fitneg.RData")
+ls
+res_neg$noncvg
+res_neg$noncvg[,,"QRM"]
+load("/Users/dutang/drop-local/Dropbox/extremes_software_review/vignettes/1-likelihood/outputs/2023_04_06_GPD-fitpos.RData")
+ls()
+res_pos$noncvg[,,"QRM"]

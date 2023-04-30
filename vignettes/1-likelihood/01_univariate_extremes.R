@@ -238,13 +238,17 @@ g2 + g4
 g3 + g5
 
 
-#| label: tab-nonconv
-#| tab-cap: "Number of failures (out of 1000 simulations) per package for bounded ($\\xi=-0.5$), light-tailed ($\\xi=0$) and heavy-tailed ($\\xi=0.5$) samples from a generalized Pareto distribution."
+#| label: tbl-gpdnonconv
+#| tbl-cap: "Number of failures (out of 1000 simulations) per package for bounded ($\\xi=-0.5$), light-tailed ($\\xi=0$) and heavy-tailed ($\\xi=0.5$) samples from a generalized Pareto distribution."
 #| cache: false
 #| echo: false
 #| eval: true
 #| message: false
 #| warning: false
+#| tbl-subcap:
+#|   - "bounded tail"
+#|   - "exponential tail"
+#|   - "heavy tail"
 nonconv_neg <- res_neg$noncvg[,1,]
 nonconv_neg <- nonconv_neg[,colSums(nonconv_neg)>0] |>
   tibble::as_tibble(rownames = "n") |>
@@ -254,6 +258,12 @@ nonconv_neg <- nonconv_neg[,colSums(nonconv_neg)>0] |>
   tidyr::pivot_longer(cols = -1,
                       names_to = "package",
                       values_to = "nfail")
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_neg),
+             booktabs = TRUE,
+             linesep = "") |>
+  kableExtra::kable_styling()
+  
 
 nonconv_exp <- res_exp$noncvg[,1,]
 nonconv_exp <- nonconv_exp[,colSums(nonconv_exp)>0] |>
@@ -264,7 +274,11 @@ nonconv_exp <- nonconv_exp[,colSums(nonconv_exp)>0] |>
   tidyr::pivot_longer(cols = -1,
                       names_to = "package",
                       values_to = "nfail")
-
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_exp),
+             booktabs = TRUE,
+             linesep = "") |>
+  kableExtra::kable_styling()
 nonconv_pos <- res_pos$noncvg[,1,]
 nonconv_pos <- nonconv_pos[,colSums(nonconv_pos)>0] |>
   tibble::as_tibble(rownames = "n") |>
@@ -274,13 +288,27 @@ nonconv_pos <- nonconv_pos[,colSums(nonconv_pos)>0] |>
   tidyr::pivot_longer(cols = -1,
                       names_to = "package",
                       values_to = "nfail")
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_pos),
+             booktabs = TRUE,
+             linesep = "") |>
+  kableExtra::kable_styling()
+
 fail_df <- dplyr::bind_rows(.id = "shape", 
                             neg = nonconv_neg, 
                             zero = nonconv_exp, 
                             pos = nonconv_pos)
 # knitr::kable(fail_df, row.names = "n", col.names = c("shape","package"))
-fail_qrm <- as.integer(unlist((fail_df |> dplyr::filter(shape == "neg", package == "QRM") |> dplyr::select(nfail))))
-fail_evir <- as.integer(fail_df |> dplyr::filter(shape == "neg", n == "20", package == "evir") |> dplyr::select(nfail)) 
+fail_qrm <- as.integer(
+  unlist((fail_df |> 
+            dplyr::filter(shape == "neg",
+                          package == "QRM") |> dplyr::select(nfail))))
+fail_evir <- as.integer(
+  fail_df |>
+    dplyr::filter(shape == "neg", 
+                  n == "20", 
+                  package == "evir") |>
+    dplyr::select(nfail)) 
 
 
 #| label: gevfit-computation
@@ -331,7 +359,8 @@ g7 <- tibble::as_tibble(results[,  "shape", ]) |>
   theme_classic() +
   labs(x = "shape",
        y = "") +
-  scale_x_continuous(limits = c(-2,1),oob = scales::squish)
+  scale_x_continuous(limits = c(-2,1),
+                     oob = scales::squish)
 
 
 results <- res_zer[, "n20", ,]
@@ -424,44 +453,50 @@ for(file in list.files(path = "outputs/",
                        full.names = TRUE)){
    load(file)
 }
-nonconv_neg <- apply(res_neg[,, "shape",], 2:3, function(x){sum(is.na(x))})
-nonconv_neg <- nonconv_neg[,colSums(nonconv_neg)>0] |>
-  tibble::as_tibble(rownames = "n") |>
-  dplyr::mutate(n = factor(n, 
-                    levels = c("n20","n50","n100","n1000"),
-                     labels = c(20L,50L, 100L, 1000L))) #|>
-  # tidyr::pivot_longer(cols = -1,
-  #                     names_to = "package",
-  #                     values_to = "nfail")
-knitr::kable(nonconv_neg,
-             booktabs = TRUE) |>
+
+nonconv_neg <- apply(res_neg[,, "shape",], 
+                     2:3, 
+                     function(x){sum(is.na(x))})
+nonconv_neg <- t(nonconv_neg[,colSums(nonconv_neg)>0]) |>
+  tibble::as_tibble(rownames = "package") |>
+  tidyr::pivot_longer(cols = -package, 
+                      names_to = "n",
+                      names_prefix = "n",
+                      values_to = "nfail")
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_neg),
+             booktabs = TRUE,
+             linesep = "") |>
   kableExtra::kable_styling()
-nonconv_zer <- apply(res_zer[,, "shape",], 2:3, function(x){sum(is.na(x))})
-nonconv_zer <- nonconv_zer[,colSums(nonconv_zer)>0] |>
-  tibble::as_tibble(rownames = "n") |>
-  dplyr::mutate(n = factor(n, 
-                    levels = c("n20","n50","n100","n1000"),
-                     labels = c(20L,50L, 100L, 1000L))) #|>
-  # tidyr::pivot_longer(cols = -1,
-  #                     names_to = "package",
-  #                     values_to = "nfail")
-knitr::kable(nonconv_zer,
-             booktabs = TRUE) |>
+
+nonconv_zer <- apply(res_zer[,, "shape",], 
+                     2:3, 
+                     function(x){sum(is.na(x))})
+nonconv_zer <- t(nonconv_zer[,colSums(nonconv_zer)>0]) |>
+  tibble::as_tibble(rownames = "package") |>
+  tidyr::pivot_longer(cols = -package, 
+                      names_to = "n",
+                      names_prefix = "n",
+                      values_to = "nfail")
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_zer),
+             booktabs = TRUE,
+             linesep = "") |>
   kableExtra::kable_styling()
-nonconv_pos <- apply(res_pos[,, "shape",], 2:3, function(x){sum(is.na(x))})
-nonconv_pos <- nonconv_pos[,colSums(nonconv_pos)>0] |>
-  tibble::as_tibble(rownames = "n") |>
-  dplyr::mutate(n = factor(n, 
-                    levels = c("n20","n50","n100","n1000"),
-                     labels = c(20L,50L, 100L, 1000L))) #|>
-#   tidyr::pivot_longer(cols = -1,
-#                       names_to = "package",
-#                       values_to = "nfail")
-# fail_df <- dplyr::bind_rows(.id = "shape", 
-#                             neg = nonconv_neg, 
-#                             zero = nonconv_zer, 
-#                             pos = nonconv_pos)
-knitr::kable(nonconv_pos,
-             booktabs = TRUE) |>
+
+
+nonconv_pos <- apply(res_pos[,, "shape",], 
+                     2:3, 
+                     function(x){sum(is.na(x))})
+nonconv_pos <- t(nonconv_pos[,colSums(nonconv_pos)>0]) |>
+  tibble::as_tibble(rownames = "package") |>
+  tidyr::pivot_longer(cols = -package, 
+                      names_to = "n",
+                      names_prefix = "n",
+                      values_to = "nfail")
+knitr::kable(xtabs(nfail ~ package + n, 
+                   data = nonconv_pos),
+             booktabs = TRUE,
+             linesep = "") |>
   kableExtra::kable_styling()
 

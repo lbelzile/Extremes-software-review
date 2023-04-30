@@ -1,0 +1,18 @@
+"package","fun","location","scale","shape","fit","argdata","outputS4","outputS3","outputS3par","dfun","pfun","density comment","distribution comment"
+"climextRemes",NA,"location","scale","shape","fit_gev","y",NA,"mle",NA,NA,NA,NA,NA
+"evd","gev","loc","scale","shape","fgev","x",NA,"estimate",NA,"dgev","pgev","correct","correct"
+"evir","gev","mu","sigma","xi","gev","data",NA,"par.ests",NA,"dgev","pgev",NA,NA
+"extraDistr","gev","mu","sigma","xi",NA,NA,NA,NA,NA,"dgev","pgev","correct","correct"
+"extRemes","evd","loc","scale","shape","fevd","x",NA,"results","par","devd","pevd","correct","correct"
+"fExtremes","gev","mu","beta","xi","gevFit","x","fit","par.ests",NA,"dgev","pgev","correct","correct"
+"ismev",NA,NA,NA,NA,"gev.fit","xdat",NA,"mle",NA,NA,NA,NA,NA
+"lmomco","gev","xi","alpha","kappa",NA,NA,NA,NA,NA,"pdfgev","cdfgev","incorrect for x < loc","incorrect for x < loc"
+"QRM","GEV","mu","sigma","xi","fit.GEV","maxima",NA,"par.ests",NA,"dGEV","pGEV","correct","correct"
+"revdbayes","gev","loc","scale","shape",NA,NA,NA,NA,NA,"dgev","pgev","correct","correct"
+"SpatialExtremes","gev","loc","scale","shape",NA,NA,NA,NA,NA,"dgev","pgev","correct","correct"
+"texmex","gev","mu","sigma","xi","evm","y",NA,"coefficients",NA,"dgev","pgev","correct","correct"
+"TLMoments","gev","loc","scale","shape",NA,NA,NA,NA,NA,"dgev","pgev","correct","correct"
+"qrmtools","GEV","loc","scale","shape","fit_GEV_MLE","x",NA,"par",NA,"dGEV","pGEV","correct","correct"
+"EnvStats","gevd","location","scale","shape","egevd","x",NA,"parameters",NA,"dgevd","pgevd","correct","correct"
+"ExtremalDep","GEV","loc","scale","shape","fGEV","data",NA,"est",NA,"dGEV","pGEV",NA,NA
+"mev","gev","loc","scale","shape","fit.gev","xdat",NA,"par",NA,"dgev","pgev","correct","correct"
