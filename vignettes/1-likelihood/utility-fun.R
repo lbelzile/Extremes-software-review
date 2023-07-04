@@ -192,7 +192,7 @@ check_gpd_fit <- function(j, obs, thres, echo = FALSE,
                          args = c(fitargs, other)),
                  silent = TRUE)
     }
-  }else
+  } else
   {
     fitargs <- list(obs)
     names(fitargs) <- pkgfunlist[j, "argdata"]
@@ -214,9 +214,9 @@ check_gpd_fit <- function(j, obs, thres, echo = FALSE,
     if(type == "gpd")
     {
       res <- rep(NA, 2)
-    }else
+    } else
       res <- rep(NA, 3)
-  }else
+  } else
   {
     if(echo > 1)
     {
@@ -244,14 +244,14 @@ check_gpd_fit <- function(j, obs, thres, echo = FALSE,
         # optimization is performed on the log scale
         res <- c(res["xi: "], exp(res["phi: "]))
         names(res) <- c("shape", "scale")
-      }else if(pkgfunlist[j,"package"] == "ercv")
+      } else if(pkgfunlist[j,"package"] == "ercv")
       {
         res <- res[c("evi", "psi")]
         names(res) <- c("shape", "scale")
       } else if(pkgfunlist[j,"package"] == "ismev")
       {
         res <- c("shape" = res[2], "scale" = res[1])
-      }else
+      } else
       {
         if(!is.null(names(res)))
         {
@@ -272,7 +272,7 @@ check_gpd_fit <- function(j, obs, thres, echo = FALSE,
           res <- res[c(pkgfunlist[j,"shape"], pkgfunlist[j,"scale"])]
 
       }
-    }else #type == "gev"
+    } else #type == "gev"
     {
       if(pkgfunlist[j,"package"] == "texmex")
       {
@@ -280,7 +280,7 @@ check_gpd_fit <- function(j, obs, thres, echo = FALSE,
         # optimization is performed on the log scale
         res <- c(res["mu: "], exp(res["phi: "]), res["xi: "])
         names(res) <- c("mu", "sigma", "xi")
-      }else if(!is.null(names(res)))
+      } else if(!is.null(names(res)))
       {
         idxshape <- grep(pkgfunlist[j,"shape"], names(res), ignore.case = TRUE)
         idxscale <- grep(pkgfunlist[j,"scale"], names(res), ignore.case = TRUE)
@@ -339,7 +339,7 @@ check_gpd_fit_all <- function(obs, thres=NULL, pkgfunlist,
       print(res)
       stop("wrong result by check_gpd_fit_all()")
     }
-  }else
+  } else
     colnames(res) <- pkgfunlist[, "package"]
   res
 }
@@ -380,7 +380,7 @@ check_gpd_varyingsize <-function(n = 10 ^ (3:4),
              c("location", "scale", "shape", "loglik",
                "gradlocation", "gradscale", "gradshape"),
              pkgfunlist[, "package"])
-    }else
+    } else
       stop("wrong type")
 
     for (nrep in 1:nbrep)
@@ -410,7 +410,7 @@ check_gpd_varyingsize <-function(n = 10 ^ (3:4),
           {
             # Return parameter estimates (scale and shape)
             res[nrep, i, c("shape", "scale"),] <- temp
-          }else
+          } else
             stop("wrong result")
 
           # Log-likelihood using a correct implementation of the GP density
@@ -433,7 +433,7 @@ check_gpd_varyingsize <-function(n = 10 ^ (3:4),
 
             }
           }
-        }else if(type == "gev")
+        } else if(type == "gev")
         {
           temp <- check_gpd_fit_all(obs, thres, pkgfunlist,
                                     pkgotherpar, type, echo=echo)
@@ -443,7 +443,7 @@ check_gpd_varyingsize <-function(n = 10 ^ (3:4),
             # Return parameter estimates
           res[nrep, i, c("location", "scale", "shape"),] <- temp
           thresh.mat <- NULL
-          }else
+          } else
           {
             print(class(temp))
             print(mode(temp))

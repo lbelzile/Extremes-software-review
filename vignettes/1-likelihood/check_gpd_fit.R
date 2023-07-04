@@ -294,6 +294,7 @@ gpdothpar.fit <- list(
   ismev = list("show" = FALSE),
   QRM = list("verbose" = FALSE),
   POT = list("std.err.type" = "none", "warn.inf" = FALSE),
+  Renext = list("shapeMin" = -1),
   texmex = list("cov" = "numeric", "verbose" = FALSE),
   qrmtools = list("estimate.cov" = FALSE)
 )

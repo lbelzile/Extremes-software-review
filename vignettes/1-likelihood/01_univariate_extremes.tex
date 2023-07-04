@@ -1,0 +1,584 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+% Make \paragraph and \subparagraph free-standing
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\makeatletter
+\@ifpackageloaded{tcolorbox}{}{\usepackage[many]{tcolorbox}}
+\makeatother
+\makeatletter
+\@ifundefined{shadecolor}{\definecolor{shadecolor}{rgb}{.97, .97, .97}}
+\makeatother
+\makeatletter
+\makeatother
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Likelihood inference for univariate extremes},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Likelihood inference for univariate extremes}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[interior hidden, enhanced, breakable, sharp corners, frame hidden, boxrule=0pt, borderline west={3pt}{0pt}{shadecolor}]}{\end{tcolorbox}}\fi
+
+\hypertarget{density-and-distribution-function-checks}{%
+\subsection{Density and distribution function
+checks}\label{density-and-distribution-function-checks}}
+
+We performed some sanity checks for various maximum likelihood
+estimation routine and parametric model implementations. Specifically,
+we verified that density functions are non-negative and evaluate to zero
+outside of the domain of the distribution, and that distribution
+functions are non-decreasing and map to the unit interval.
+
+The generalized Pareto distribution has lower bound at the location
+parameter \(u\) and is bounded above at \(u -\sigma/\xi\) whenever
+\(\xi < 0\). Many software implementations forgo the location parameter,
+since for modelling large quantiles of a random variable \(Y\) above
+threshold \(u\), it suffices to look at threshold exceedances
+\(Y-u >0\). No threshold exceedance should be exactly equal to zero so
+the value of the density at that point is immaterial.
+
+\hypertarget{tbl-gp1}{}
+\begin{table}
+\caption{\label{tbl-gp1}Evaluation of generalized Pareto model density and distribution
+functions. }\tabularnewline
+
+\centering
+\begin{tabular}{llll}
+\toprule
+package & location & density & distribution function\\
+\midrule
+eva & yes & correct & correct\\
+evd & yes & incorrect for x = loc & correct\\
+evir & yes & incorrect for x < loc & incorrect outside support\\
+extraDistr & yes & incorrect for x = loc & correct\\
+extRemes & yes & incorrect for x = loc & correct\\
+\addlinespace
+fExtremes & yes & incorrect for x = loc & correct\\
+lmom & yes &  & incorrect outside support\\
+lmomco & yes & correct & incorrect outside support\\
+mev & yes & correct & correct\\
+POT & yes & incorrect for x = loc & correct\\
+\addlinespace
+QRM & no & incorrect for x = loc & correct\\
+qrmtools & no & correct & correct\\
+ReIns & yes & correct & correct\\
+Renext & yes & incorrect for x = loc & correct\\
+revdbayes & yes & correct & correct\\
+\addlinespace
+SpatialExtremes & yes & incorrect for x = loc & correct\\
+tea & yes & correct & correct\\
+texmex & yes & correct & correct\\
+TLMoments & yes & correct & correct\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\hypertarget{tbl-gev1}{}
+\begin{table}
+\caption{\label{tbl-gev1}Evaluation of generalized extreme value density and distribution
+functions. }\tabularnewline
+
+\centering
+\begin{tabular}{lll}
+\toprule
+package & density & distribution function\\
+\midrule
+EnvStats & correct & correct\\
+evd & correct & correct\\
+evir &  & \\
+extraDistr & correct & correct\\
+ExtremalDep &  & \\
+\addlinespace
+extRemes & correct & correct\\
+fExtremes & correct & correct\\
+lmomco & incorrect for x < loc & incorrect for x < loc\\
+mev & correct & correct\\
+QRM & correct & correct\\
+\addlinespace
+qrmtools & correct & correct\\
+revdbayes & correct & correct\\
+SpatialExtremes & correct & correct\\
+texmex & correct & correct\\
+TLMoments & correct & correct\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Certain packages, listed in Table~\ref{tbl-gp1} and
+Table~\ref{tbl-gev1}, have incorrect implementations of density and
+distribution functions.
+
+\hypertarget{optimization-routines}{%
+\subsection{Optimization routines}\label{optimization-routines}}
+
+We compared the maximum likelihood estimates returned by default
+estimation procedures for different packages for simulated data,
+checking that the value returned is a global optimum and the gradient is
+approximately zero whenever \(\widehat{\xi} > -1\). For the generalized
+extreme value distribution, both \texttt{POT} and \texttt{evd} return
+sampling distributions that are underdispersed relative to other
+implementations, while \texttt{ercv} and \texttt{extRemes} both have a
+large number of runs that return exactly zero for the shape parameter.
+
+\hypertarget{generalized-pareto-distribution}{%
+\subsubsection{Generalized Pareto
+distribution}\label{generalized-pareto-distribution}}
+
+For threshold exceedances, we simulated 50 exceedances from a
+generalized Pareto distribution \(\mathsf{GP}(\sigma=1000, \xi=-0.5)\)
+and from an exponential distribution with \(\sigma=1000\). The large
+scale value is intended to check the robustness of gradient-based
+algorithms; from an optimization perspective, it is wise to ensure that
+the gradient of each component, scale and shape, are not magnitude
+apart. The data can easily be scaled prior to the optimization in case
+this is problematic.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\textwidth,height=\textheight]{01_univariate_extremes_files/figure-pdf/fig-gpfit-grad-1.pdf}
+
+}
+
+\caption{\label{fig-gpfit-grad}Magnitude of the shape component of the
+score vector at the value returned by the optimization routine. The
+density plots are based on 1000 samples simulated from a generalized
+Pareto distribution with shape \(\xi =-0.5\) and scale \(\sigma=1000\),
+split by simulations yielding a boundary case (\(\widehat{\xi} = -1\),
+gray) and regular case (\(\widehat{\xi} > -1\), black); the \(y\)-axis
+scale for each package is different to ease visualization. Results for
+samples for which the numerical routines failed to converge or the
+gradient is unevaluated are not shown.}
+
+\end{figure}
+
+Figure~\ref{fig-gpfit-grad} shows the distribution of the score vector,
+i.e., the gradient of the log likelihood. The latter should vanish when
+evaluated at the maximum likelihood estimator
+(\(\widehat{\sigma}, \widehat{\xi}\)) provided \(\widehat{\xi} > -1\).
+Most instances of non-zero gradient are attributable to boundary cases
+with \(\widehat{\xi}=-1\) not accounted for. Other discrepancies are due
+to numerical tolerance for convergence, but the differences in log
+likelihood relative to the maximum over all routines are negligible in
+most non-boundary cases investigated. Some routines, based on
+Nelder--Mead simplex algorithm, do not check the gradient but this is
+immaterial if the value of the function is nearly identical to that of
+the maximum likelihood.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\textwidth,height=\textheight]{01_univariate_extremes_files/figure-pdf/fig-gpfit-diffmle-1.pdf}
+
+}
+
+\caption{\label{fig-gpfit-diffmle}Difference between likelihood
+evaluated at parameters returned by routine and the maximum likelihood
+over all routines for generalized Pareto samples with negative shape
+(left) and exponential samples (right), both with large scale parameter
+\(\sigma=1000\). Results for samples for which the numerical routines
+failed to converge are not shown. Only packages with 90\% percentile
+giving a discrepancy larger than \(10^{-4}\) are shown.}
+
+\end{figure}
+
+Figure~\ref{fig-gpfit-diffmle} shows these differences through survival
+function plots, highlighting instances where the package fails to return
+correct values. Most packages do fine, except for a handful:
+\texttt{evd}, \texttt{extRemes} and \texttt{POT} (which uses routines
+from \texttt{evd}) stand out of the lot.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\textwidth,height=\textheight]{01_univariate_extremes_files/figure-pdf/fig-gpfit-shapepar-1.pdf}
+
+}
+
+\caption{\label{fig-gpfit-shapepar}Dot plots of shape parameters
+returned by optimization routine for generalized Pareto samples with
+negative shape (left) and exponential samples (right). Results for
+samples for which the numerical routines failed to converge are not
+shown.}
+
+\end{figure}
+
+We can figure out the source of some of these oddities by plotting the
+distribution of the shape parameter over all 1000 replications.
+Figure~\ref{fig-gpfit-shapepar}: the \texttt{QRM} package has unexpected
+small spread and a positive bias for estimation \(\xi\), different from
+other packages because it fails more often when \(\xi\) is negative.
+Both \texttt{ercv} and \texttt{extRemes} routines return zero shape
+estimates, leading to noticeable point masses. \texttt{Renext} returns a
+hard-coded lower bound, while only \texttt{SpatialExtremes} and
+\texttt{mev} correctly return \(\xi=-1\).
+
+\begin{table}
+
+\caption{\label{tbl-gpdnonconv}Number of failures (out of 1000
+simulations) per package for bounded (\(\xi=-0.5\)), light-tailed
+(\(\xi=0\)) and heavy-tailed (\(\xi=0.5\)) samples from a generalized
+Pareto distribution.}\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gpdnonconv-1}bounded tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 20 & 50 & 100 & 1000\\
+\midrule
+evir & 225 & 15 & 0 & 0\\
+fExtremes & 225 & 15 & 0 & 0\\
+QRM & 50 & 122 & 169 & 253\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+\newline
+\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gpdnonconv-2}exponential tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 20 & 50 & 100 & 1000\\
+\midrule
+evir & 37 & 0 & 0 & 0\\
+fExtremes & 37 & 0 & 0 & 0\\
+QRM & 4 & 12 & 7 & 0\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+\newline
+\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gpdnonconv-3}heavy tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 20 & 50 & 100 & 1000\\
+\midrule
+evir & 7 & 0 & 0 & 0\\
+fExtremes & 7 & 0 & 0 & 0\\
+QRM & 1 & 0 & 0 & 0\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+
+\end{table}
+
+Some package have routines that fail to converge often when the shape is
+negative, as shown in Table~\ref{tbl-gpdnonconv}; the most likely
+culprit for this is poor starting values. The routines in \texttt{ercv}
+and \texttt{fExtremes} (same as \texttt{evir}) fail often in small
+samples: for \(n=20\) exceedances, the function returned an error in 225
+simulations. For the latter, the error is due to poor implementation of
+the log-likelihood that leads to infinite finite differences between
+estimates. For \texttt{QRM}, the choice of starting values, which cannot
+be modified by the user, is not adequate with strong negative shapes: it
+failed more than 50 (\(n=20\)), 122 (\(n=50\)), 169 (\(n=100\)) and 253
+(\(n=1000\)) times for negative shapes, indicating that the issue is not
+sample size. The \texttt{qrmtools} package, which supersedes
+\texttt{QRM}, has no such problems.
+
+\hypertarget{generalized-extreme-value-distribution}{%
+\subsubsection{Generalized extreme value
+distribution}\label{generalized-extreme-value-distribution}}
+
+The optimization routines for the generalized extreme value distribution
+are better behaved and nearly all packages give identical results: only
+\texttt{evd} and \texttt{texmex} failed to converge and returned
+abnormally high shape values in a handful of instances out of 1000
+simulations.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\textwidth,height=\textheight]{01_univariate_extremes_files/figure-pdf/fig-gevfit-diffmle-1.pdf}
+
+}
+
+\caption{\label{fig-gevfit-diffmle}Difference between likelihood
+evaluated at parameters returned by routine and the maximum likelihood
+over all routines for generalized extreme value samples with negative
+shape (left) and exponential samples (right), both with large scale
+parameter \(\sigma=1000\). Results for samples for which the numerical
+routines failed to converge are not shown. Only packages with 90\%
+percentile giving a discrepancy larger than \(10^{-4}\) are shown.}
+
+\end{figure}
+
+Unsurprisingly, the portrait is the same for the generalized extreme
+value distribution when it comes to boundary constraints: for example,
+\texttt{climextRemes} does not return shapes less than or equal to
+\(-1\). \texttt{extRemes} has odd behaviour with a visible point mass at
+\(\xi=0\) in the simulations, even when this value has measure zero.
+Only \texttt{mev} and \texttt{SpatialExtremes} handle the boundary
+constraints. Figure~\ref{fig-gevfit-diffmle} shows the difference in
+maximum likelihood returned by the packages, excluding cases with
+\(\widehat{\xi}=-1\) for which the log likelihood becomes unbounded for
+combinations of \(\sigma\) and \(\xi<-1\). Some packages, such as
+\texttt{evd}, also sometimes return local optimum (perhaps due to use of
+the BFGS routine) and this in turn leads to erroneous comparisons of
+nested models.
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\textwidth,height=\textheight]{01_univariate_extremes_files/figure-pdf/fig-gevfit-shapepar-1.pdf}
+
+}
+
+\caption{\label{fig-gevfit-shapepar}Dot plots of shape parameters
+returned by optimization routine for generalized extreme value samples
+with negative shape (left) and Gumbel samples (right). Results for
+samples for which the numerical routines failed to converge are not
+shown.}
+
+\end{figure}
+
+\begin{table}
+
+\caption{\label{tbl-gevnonconv}Number of failures for the optimization
+routine for maximum likelihood-based estimation of the generalized
+extreme value model (out of 1000
+simulations).}\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gevnonconv-1}bounded tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 100 & 1000 & 20 & 50\\
+\midrule
+climextRemes & 151 & 200 & 172 & 127\\
+EnvStats & 156 & 215 & 100 & 131\\
+evir & 0 & 0 & 27 & 0\\
+fExtremes & 23 & 0 & 92 & 28\\
+ismev & 0 & 0 & 4 & 0\\
+mev & 0 & 0 & 11 & 0\\
+texmex & 0 & 0 & 3 & 0\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+\newline
+\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gevnonconv-2}light tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 100 & 1000 & 20 & 50\\
+\midrule
+climextRemes & 0 & 0 & 4 & 0\\
+EnvStats & 0 & 0 & 4 & 0\\
+fExtremes & 0 & 0 & 1 & 0\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+\newline
+\begin{minipage}[t]{\linewidth}
+\subcaption{\label{tbl-gevnonconv-3}heavy tail }
+
+{\centering 
+
+\tabularnewline
+
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+  & 100 & 1000 & 20 & 50\\
+\midrule
+climextRemes & 2 & 0 & 1 & 1\\
+EnvStats & 9 & 1 & 10 & 10\\
+evir & 0 & 0 & 4 & 0\\
+fExtremes & 2 & 0 & 5 & 3\\
+\bottomrule
+\end{tabular}
+
+}
+
+\end{minipage}%
+
+\end{table}
+
+Table~\ref{tbl-gevnonconv} gives a breakdown of the number of instances
+for which the maximisation routine failed: two packages,
+\texttt{climextRemes} and \texttt{EnvStats}, stand out for negative
+shapes and the percentage of failures increases with the sample size.
+
+
+
+\end{document}

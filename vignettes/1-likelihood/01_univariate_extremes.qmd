@@ -407,7 +407,7 @@ g7 <- tibble::as_tibble(results[,  "shape", ]) |>
                names_to = "package",
                values_to = "shape") |>
   dplyr::arrange(tolower(package)) |>
-  ggplot(mapping = aes(x = shape, y = package)) +
+  ggplot(mapping = aes(x = shape, y = forcats::fct_rev(package))) +
   ggdist::stat_dots() +
   theme_classic() +
   labs(x = "shape",
@@ -449,7 +449,7 @@ g9 <- tibble::as_tibble(results[,  "shape", ]) |>
                values_to = "shape") |>
   dplyr::arrange(tolower(package)) |>
   # filter(package != "tea") |> # outlier
-  ggplot(mapping = aes(x = shape, y = package)) +
+  ggplot(mapping = aes(x = shape, y = forcats::fct_rev(package))) +
   ggdist::stat_dots() +
   # geom_boxplot() +
   # scale_x_continuous(limits = c(-1, 2)) +

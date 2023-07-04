@@ -1,5 +1,5 @@
-setwd(here::here())
-source("../vignettes/1-univariate/utility-fun.R")
+setwd(this.path::here())
+source("../vignettes/1-likelihood/utility-fun.R")
 
 #### GPD list ####
 gpdpkglist <- cbind(
@@ -76,6 +76,7 @@ gpdothpar.fit <- list(
   ismev=list("show" = FALSE),
   QRM = list("verbose" = FALSE),
   POT = list("std.err.type"="none", "warn.inf"=FALSE),
+  Renext = list("shapeMin" = -1),
   texmex=list("cov" = "numeric", "verbose"=FALSE),
   qrmtools = list("estimate.cov" = FALSE))
 
@@ -92,9 +93,8 @@ set.seed(123)
 nrep <- 1000
 
 time.gamma <- system.time(
-  res1gamma <- check_gpd_gev_varyingsize(
-  n = c(seq(from = 200L, to = 900L, by = 100L),
-        seq(from = 1000L, to = 9000L, by = 1000L)),
+  res1gamma <- check_gpd_varyingsize(
+  n = c(500L, 1000L),
   nbrep = 1000L,
   dist = "gamma",
   thres.qu = qgamma(p = 0.95, shape = 3, scale = 2),
@@ -103,4 +103,4 @@ time.gamma <- system.time(
   pkgfunlist = gpdpkglist,
   pkgotherpar = gpdothpar.fit,
   type = "gpd"))
-save(res1gamma, file="Simulation_gamma.RData")
+save(res1gamma, file = "Simulation_gamma.RData")
